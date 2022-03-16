@@ -1,0 +1,28 @@
+{
+  "name": "phonebook-backend",
+  "version": "1.0.0",
+  "description": "Created as part of the Full Stack Open 2022 exercises",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thushanperera95/Phonebook-Backend.git"
+  },
+  "author": "Thushan Perera",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thushanperera95/Phonebook-Backend/issues"
+  },
+  "homepage": "https://github.com/thushanperera95/Phonebook-Backend#readme",
+  "dependencies": {
+    "express": "^4.17.3",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
