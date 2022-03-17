@@ -68,59 +68,44 @@ app.delete("/api/persons/:id", (request, response, next) => {
     .catch((error) => next(error));
 });
 
-const validateRequestBody = (body, next) => {
-  if (!body.name) {
-    next({
-      name: "InvalidRequest",
-      message: "name missing",
-    });
-    return false;
-  } else if (!body.number) {
-    next({
-      name: "InvalidRequest",
-      message: "number missing",
-    });
-    return false;
-  }
-
-  return true;
-};
-
 app.post("/api/persons", (request, response, next) => {
   const body = request.body;
-
-  if (!validateRequestBody(body, next)) {
-    return;
-  }
 
   const person = new Person({
     name: body.name,
     number: body.number,
   });
 
-  person
-    .save()
-    .then((savedPerson) => {
-      response.json(savedPerson);
+  Person.findOne({ name: person.name })
+    .then((result) => {
+      if (result) {
+        next({
+          name: "DuplicateEntryError",
+          message: `A phonebook entry already exists for ${person.name}`,
+        });
+      } else {
+        person.save().then((savedPerson) => {
+          response.json(savedPerson);
+        });
+      }
     })
     .catch((error) => next(error));
 });
 
 app.put("/api/persons/:id", (request, response, next) => {
-  const body = request.body;
+  const { name, number } = request.body;
 
-  if (!validateRequestBody(body, next)) {
-    return;
-  }
-
-  const person = {
-    name: body.name,
-    number: body.number,
-  };
-
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  Person.findByIdAndUpdate(
+    request.params.id,
+    { name, number },
+    { new: true, runValidators: true, context: "query" }
+  )
     .then((updatedPerson) => {
-      response.json(updatedPerson);
+      if (updatedPerson) {
+        response.json(updatedPerson);
+      } else {
+        next();
+      }
     })
     .catch((error) => next(error));
 });
@@ -136,9 +121,13 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
-  } else if (error.name === "InvalidRequest") {
-    return response.status(400).send({ error: error.message });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
+  } else if (error.name === "DuplicateEntryError") {
+    return response.status(409).send({ error: error.message });
   }
+
+  next(error);
 };
 
 app.use(errorHandler);
