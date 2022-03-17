@@ -84,9 +84,12 @@ app.post("/api/persons", (request, response, next) => {
           message: `A phonebook entry already exists for ${person.name}`,
         });
       } else {
-        person.save().then((savedPerson) => {
-          response.json(savedPerson);
-        });
+        person
+          .save()
+          .then((savedPerson) => {
+            response.json(savedPerson);
+          })
+          .catch((error) => next(error));
       }
     })
     .catch((error) => next(error));
